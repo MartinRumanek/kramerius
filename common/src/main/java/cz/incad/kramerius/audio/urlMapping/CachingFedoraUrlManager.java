@@ -24,6 +24,10 @@ import cz.incad.kramerius.Initializable;
 import cz.incad.kramerius.audio.AudioStreamId;
 import cz.incad.kramerius.audio.XpathEvaluator;
 
+import org.ehcache.Cache;
+import org.ehcache.CacheManager;
+import org.ehcache.config.builders.CacheConfigurationBuilder;
+import org.ehcache.config.builders.ResourcePoolsBuilder;
 import org.w3c.dom.Document;
 
 import javax.xml.xpath.XPathConstants;
@@ -48,20 +52,36 @@ import java.util.logging.Logger;
 public class CachingFedoraUrlManager implements RepositoryUrlManager, Initializable {
 
     private static final Logger LOGGER = Logger.getLogger(CachingFedoraUrlManager.class.getName());
-    private static final RepositoryUrlCache linkCache = new EhcacheUrlCache();
+
     private XPathExpression dsLocation;
+
     @Inject
     @Named("securedFedoraAccess")
-    FedoraAccess fedoraAccess;
+    private FedoraAccess fedoraAccess;
+
+    private CacheManager cacheManager;
+
+    private Cache<AudioStreamId, URL> cache;
+
+    private static final String CACHE_ALIAS = "audioRepositoryUrlCache";
 
     @Override
     public final void init() {
         //nothing here, initialization in constructor
     }
 
-    public CachingFedoraUrlManager() throws IOException {
+    @Inject
+    public CachingFedoraUrlManager(CacheManager cacheManager) throws IOException {
         LOGGER.log(Level.INFO, "initializing {0}", CachingFedoraUrlManager.class.getName());
         this.dsLocation = createDsLocationExpression();
+        this.cacheManager = cacheManager;
+
+        cache = cacheManager.getCache(CACHE_ALIAS, AudioStreamId.class, URL.class);
+        if (cache == null) {
+            cache = cacheManager.createCache(CACHE_ALIAS,
+                    CacheConfigurationBuilder.newCacheConfigurationBuilder(AudioStreamId.class, URL.class,
+                            ResourcePoolsBuilder.heap(10).build()));
+        }
     }
 
     private XPathExpression createDsLocationExpression() {
@@ -78,16 +98,16 @@ public class CachingFedoraUrlManager implements RepositoryUrlManager, Initializa
 
     @Override
     public URL getAudiostreamRepositoryUrl(AudioStreamId id) throws IOException {
-        URL urlFromCache = linkCache.getUrl(id);
+        URL urlFromCache = cache.get(id);
         if (urlFromCache != null) { //cache hit
             return urlFromCache;
         } else {//cache miss
             URL urlFromFedora = getUrlFromFedora(id);
             if (urlFromFedora != null) {
-                linkCache.storeUrl(id, urlFromFedora);
+                cache.put(id, urlFromFedora);
             }
             return urlFromFedora;
-        }
+       }
     }
 
     private URL getUrlFromFedora(AudioStreamId id) throws IOException {
@@ -118,8 +138,8 @@ public class CachingFedoraUrlManager implements RepositoryUrlManager, Initializa
     @Override
     public void close() {
         LOGGER.log(Level.INFO, "destroying {0}", CachingFedoraUrlManager.class.getName());
-        if (linkCache != null) {
-            linkCache.close();
+        if (cache != null) {
+            cacheManager.removeCache(CACHE_ALIAS);
         }
     }
 }

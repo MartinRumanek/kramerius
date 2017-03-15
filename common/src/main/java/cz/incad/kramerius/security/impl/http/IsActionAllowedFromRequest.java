@@ -16,9 +16,7 @@
  */
 package cz.incad.kramerius.security.impl.http;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.security.Principal;
+import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,17 +27,13 @@ import com.google.inject.Provider;
 
 import cz.incad.kramerius.ObjectPidsPath;
 import cz.incad.kramerius.security.EvaluatingResult;
-import cz.incad.kramerius.security.Role;
 import cz.incad.kramerius.security.IsActionAllowed;
 import cz.incad.kramerius.security.RightCriteriumContext;
 import cz.incad.kramerius.security.RightCriteriumException;
 import cz.incad.kramerius.security.RightCriteriumContextFactory;
 import cz.incad.kramerius.security.RightsManager;
 import cz.incad.kramerius.security.User;
-import cz.incad.kramerius.security.UserManager;
-import cz.incad.kramerius.security.impl.UserImpl;
 import cz.incad.kramerius.utils.IPAddressUtils;
-import cz.incad.kramerius.utils.NetworkUtils;
 import cz.incad.kramerius.utils.conf.KConfiguration;
 
 public class IsActionAllowedFromRequest implements IsActionAllowed {

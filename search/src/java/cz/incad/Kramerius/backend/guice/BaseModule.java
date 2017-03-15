@@ -11,9 +11,8 @@ import cz.incad.kramerius.Constants;
 import cz.incad.kramerius.FedoraAccess;
 import cz.incad.kramerius.MostDesirable;
 import cz.incad.kramerius.SolrAccess;
-import cz.incad.kramerius.audio.AudioLifeCycleHook;
+import cz.incad.kramerius.audio.CacheLifeCycleHook;
 import cz.incad.kramerius.audio.urlMapping.CachingFedoraUrlManager;
-import cz.incad.kramerius.audio.urlMapping.MockUrlManager;
 import cz.incad.kramerius.audio.urlMapping.RepositoryUrlManager;
 import cz.incad.kramerius.impl.FedoraAccessImpl;
 import cz.incad.kramerius.impl.MostDesirableImpl;
@@ -33,17 +32,13 @@ import cz.incad.kramerius.service.impl.GoogleAnalyticsImpl;
 import cz.incad.kramerius.service.impl.METSServiceImpl;
 import cz.incad.kramerius.statistics.StatisticReport;
 import cz.incad.kramerius.statistics.StatisticsAccessLog;
-import cz.incad.kramerius.statistics.filters.DateFilter;
-import cz.incad.kramerius.statistics.filters.ModelFilter;
-import cz.incad.kramerius.statistics.filters.StatisticsFilter;
-import cz.incad.kramerius.statistics.filters.StatisticsFiltersContainer;
-import cz.incad.kramerius.statistics.filters.VisibilityFilter;
 import cz.incad.kramerius.statistics.impl.*;
 import cz.incad.kramerius.utils.conf.KConfiguration;
 import cz.incad.kramerius.virtualcollections.Collection;
 import cz.incad.kramerius.virtualcollections.CollectionsManager;
 import cz.incad.kramerius.virtualcollections.impl.fedora.FedoraCollectionsManagerImpl;
 import cz.incad.kramerius.virtualcollections.impl.solr.SolrCollectionManagerImpl;
+import org.ehcache.CacheManager;
 
 import javax.servlet.jsp.jstl.fmt.LocalizationContext;
 
@@ -98,8 +93,10 @@ public class BaseModule extends AbstractModule {
         
         bind(RepositoryUrlManager.class).to(CachingFedoraUrlManager.class).in(Scopes.SINGLETON); //TODO: implement correct shutdown (Issue 567)
 
+        bind(CacheManager.class).toProvider(CacheProvider.class).in(Scopes.SINGLETON);
+
         Multibinder<LifeCycleHook> lfhooks = Multibinder.newSetBinder(binder(), LifeCycleHook.class);
-        lfhooks.addBinding().to(AudioLifeCycleHook.class);
+        lfhooks.addBinding().to(CacheLifeCycleHook.class);
     }
 
     @Provides

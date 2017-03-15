@@ -29,7 +29,7 @@ public class GuiceSecurityHTTPModule extends AbstractModule {
     
     @Override
     protected void configure() {
-        bind(IsActionAllowed.class).to(IsActionAllowedFromRequest.class);
+        bind(IsActionAllowed.class).to(IsActionAllowedFromRequestCached.class);
         bind(User.class).toProvider(DbCurrentLoggedUser.class);
     }
 }
