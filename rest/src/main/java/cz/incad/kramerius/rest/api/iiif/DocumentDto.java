@@ -3,6 +3,8 @@ package cz.incad.kramerius.rest.api.iiif;
 import cz.incad.kramerius.rest.api.k5.client.utils.SOLRUtils;
 import org.w3c.dom.Element;
 
+import java.util.List;
+
 /**
  * DocumentDto
  *
@@ -18,11 +20,19 @@ public class DocumentDto {
     }
 
     public String getTitle() {
-        return SOLRUtils.value(indexDoc, "root_title", String.class);
+        return SOLRUtils.value(indexDoc, "title", String.class);
+    }
+
+    public String getDctitle() {
+        return SOLRUtils.value(indexDoc, "dc.title", String.class);
     }
 
     public String getModel() {
         return SOLRUtils.value(indexDoc, "fedora.model", String.class);
+    }
+
+    public List<String> getDetails() {
+        return SOLRUtils.array(indexDoc, "details", String.class);
     }
 
     public String getPid() {

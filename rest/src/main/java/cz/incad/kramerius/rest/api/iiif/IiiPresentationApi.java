@@ -120,7 +120,7 @@ public class IiiPresentationApi {
                 String id = ApplicationURL.applicationURL(this.requestProvider.get()) + "/canvas/" + repPid;
                 Pair<Integer, Integer> resolution = getResolution(repPid);
                 if (resolution != null) {
-                    Canvas canvas = new CanvasImpl(id, new PropertyValueSimpleImpl(page.getTitle()), resolution.getLeft(),
+                    Canvas canvas = new CanvasImpl(id, new PropertyValueSimpleImpl(page.getDctitle()), resolution.getLeft(),
                             resolution.getRight());
 
                     ImageResource resource = new ImageResourceImpl();
@@ -192,10 +192,12 @@ public class IiiPresentationApi {
 
                 for (String issuePid : issues) {
                     issuePid = issuePid.replace("/", "");
-
                     DocumentDto issue = getIiifDocument(issuePid);
                     if (!"periodicalitem".equals(issue.getModel())) continue;
-                    ManifestReference manifest = new ManifestReferenceImpl(UriBuilder.fromUri(iiifUri).path(getClass(), "manifest").build(issuePid));
+                    List<String> details = issue.getDetails();
+                    PropertyValue label = new PropertyValueSimpleImpl(details.get(0).replace("#", " "));
+                    ManifestReference manifest = new ManifestReferenceImpl(UriBuilder.fromUri(iiifUri).path(getClass(), "manifest").build(issuePid),
+                            label);
                     manifestReferenceList.add(manifest);
                 }
             }
