@@ -39,6 +39,7 @@ public class IiifServlet extends AbstractImageServlet {
 
 
     @Inject
+    @Named("cachedSolrAccess")
     private SolrAccess solrAccess;
 
     @Inject
@@ -48,7 +49,7 @@ public class IiifServlet extends AbstractImageServlet {
     private Provider<User> userProvider;
 
     @Inject
-    @Named("securedFedoraAccess")
+    @Named("cachedFedoraAccess")
     protected transient FedoraAccess fedoraAccess;
 
     static java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(IiifServlet.class.getName());
@@ -56,6 +57,7 @@ public class IiifServlet extends AbstractImageServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        long begin = System.currentTimeMillis();
         String requestURL = req.getRequestURL().toString();
         String zoomUrl = DeepZoomServlet.disectZoom(requestURL);
         StringTokenizer tokenizer = new StringTokenizer(zoomUrl, "/");

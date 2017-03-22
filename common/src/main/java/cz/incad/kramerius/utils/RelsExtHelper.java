@@ -26,6 +26,7 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.ehcache.Cache;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -41,7 +42,6 @@ public class RelsExtHelper {
 
     public static final Logger LOGGER = Logger.getLogger(RelsExtHelper.class.getName());
 
-    
     
     public static String getReplicatedFromUrl(String uuid, FedoraAccess fedoraAccess) throws IOException, XPathExpressionException {
         Document relsExt = fedoraAccess.getRelsExt(uuid);

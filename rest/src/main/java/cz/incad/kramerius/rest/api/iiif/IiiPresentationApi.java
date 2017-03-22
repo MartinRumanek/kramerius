@@ -80,7 +80,7 @@ public class IiiPresentationApi {
     private URI iiifUri;
 
     @Inject
-    public IiiPresentationApi(SolrMemoization solrMemoization, @Named("securedFedoraAccess") FedoraAccess fedoraAccess,
+    public IiiPresentationApi(SolrMemoization solrMemoization, @Named("rawFedoraAccess") FedoraAccess fedoraAccess,
                               SolrAccess solrAccess, Provider<HttpServletRequest> requestProvider) {
         this.solrMemoization = solrMemoization;
         this.fedoraAccess = fedoraAccess;

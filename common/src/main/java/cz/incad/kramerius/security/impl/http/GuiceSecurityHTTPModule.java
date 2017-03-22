@@ -20,7 +20,6 @@ import com.google.inject.AbstractModule;
 
 import cz.incad.kramerius.security.IsActionAllowed;
 import cz.incad.kramerius.security.User;
-import cz.incad.kramerius.utils.conf.KConfiguration;
 
 
 public class GuiceSecurityHTTPModule extends AbstractModule {

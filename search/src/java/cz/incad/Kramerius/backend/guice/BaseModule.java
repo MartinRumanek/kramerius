@@ -14,6 +14,8 @@ import cz.incad.kramerius.SolrAccess;
 import cz.incad.kramerius.audio.CacheLifeCycleHook;
 import cz.incad.kramerius.audio.urlMapping.CachingFedoraUrlManager;
 import cz.incad.kramerius.audio.urlMapping.RepositoryUrlManager;
+import cz.incad.kramerius.impl.CachedFedoraAccessImpl;
+import cz.incad.kramerius.impl.CachedSolrAccessImpl;
 import cz.incad.kramerius.impl.FedoraAccessImpl;
 import cz.incad.kramerius.impl.MostDesirableImpl;
 import cz.incad.kramerius.impl.SolrAccessImpl;
@@ -55,6 +57,9 @@ public class BaseModule extends AbstractModule {
     protected void configure() {
         bind(FedoraAccess.class).annotatedWith(Names.named("rawFedoraAccess")).to(FedoraAccessImpl.class).in(Scopes.SINGLETON);
         bind(FedoraAccess.class).annotatedWith(Names.named("securedFedoraAccess")).to(SecuredFedoraAccessImpl.class).in(Scopes.SINGLETON);
+        bind(FedoraAccess.class).annotatedWith(Names.named("cachedFedoraAccess")).to(CachedFedoraAccessImpl.class).in(Scopes.SINGLETON);
+
+
         bind(StatisticsAccessLog.class).to(DatabaseStatisticsAccessLogImpl.class).in(Scopes.SINGLETON);
         
         Multibinder<StatisticReport> reports = Multibinder.newSetBinder(binder(), StatisticReport.class);
@@ -65,6 +70,7 @@ public class BaseModule extends AbstractModule {
 
         
         bind(SolrAccess.class).to(SolrAccessImpl.class).in(Scopes.SINGLETON);
+        bind(SolrAccess.class).annotatedWith(Names.named("cachedSolrAccess")).to(CachedSolrAccessImpl.class).in(Scopes.SINGLETON);
 
         bind(METSService.class).to(METSServiceImpl.class);
         bind(KConfiguration.class).toInstance(KConfiguration.getInstance());

@@ -13,6 +13,8 @@ import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
 import org.ehcache.config.builders.ResourcePoolsBuilder;
+import org.ehcache.config.units.MemoryUnit;
+import org.ehcache.expiry.Expirations;
 import org.joda.time.Duration;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,9 +29,9 @@ import java.util.logging.Logger;
  */
 public class IsActionAllowedFromRequestCached extends IsActionAllowedFromRequest{
     class CacheKey implements Serializable {
-        private String PID;
-        private User user;
-        private String ip;
+        private final String PID;
+        private final User user;
+        private final String ip;
 
         public CacheKey(String PID, User user, String ip) {
             this.PID = PID;
@@ -58,7 +60,7 @@ public class IsActionAllowedFromRequestCached extends IsActionAllowedFromRequest
         }
     }
 
-    static private Cache<CacheKey, Boolean> cache;
+    private static Cache<CacheKey, Boolean> cache;
 
     private Provider<HttpServletRequest> provider;
 
@@ -67,7 +69,8 @@ public class IsActionAllowedFromRequestCached extends IsActionAllowedFromRequest
     @Inject
     public IsActionAllowedFromRequestCached(Logger logger, Provider<HttpServletRequest> provider,
                                             RightsManager rightsManager, RightCriteriumContextFactory contextFactory,
-                                            Provider<User> currentUserProvider, CacheManager cacheManager) {
+                                            Provider<User> currentUserProvider, CacheManager cacheManager,
+                                            KConfiguration configuration) {
         super(logger, provider, rightsManager, contextFactory, currentUserProvider);
 
         this.provider = provider;
@@ -76,8 +79,9 @@ public class IsActionAllowedFromRequestCached extends IsActionAllowedFromRequest
         if (cache == null) {
             cache = cacheManager.createCache(CACHE_ALIAS,
                     CacheConfigurationBuilder.newCacheConfigurationBuilder(CacheKey.class, Boolean.class,
-                            ResourcePoolsBuilder.heap(1000).build()));
-
+                            ResourcePoolsBuilder.heap(1000).offheap(32, MemoryUnit.MB))
+                            .withExpiry(Expirations.timeToLiveExpiration(
+                                    org.ehcache.expiry.Duration.of(configuration.getCacheTimeToLiveExpiration(), TimeUnit.SECONDS))).build());
         }
     }
 

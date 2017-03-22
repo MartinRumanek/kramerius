@@ -24,10 +24,14 @@ import cz.incad.kramerius.Initializable;
 import cz.incad.kramerius.audio.AudioStreamId;
 import cz.incad.kramerius.audio.XpathEvaluator;
 
+import cz.incad.kramerius.utils.conf.KConfiguration;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
 import org.ehcache.config.builders.ResourcePoolsBuilder;
+import org.ehcache.config.units.MemoryUnit;
+import org.ehcache.expiry.Duration;
+import org.ehcache.expiry.Expirations;
 import org.w3c.dom.Document;
 
 import javax.xml.xpath.XPathConstants;
@@ -37,6 +41,7 @@ import javax.xml.xpath.XPathExpressionException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -71,7 +76,7 @@ public class CachingFedoraUrlManager implements RepositoryUrlManager, Initializa
     }
 
     @Inject
-    public CachingFedoraUrlManager(CacheManager cacheManager) throws IOException {
+    public CachingFedoraUrlManager(CacheManager cacheManager, KConfiguration configuration) throws IOException {
         LOGGER.log(Level.INFO, "initializing {0}", CachingFedoraUrlManager.class.getName());
         this.dsLocation = createDsLocationExpression();
         this.cacheManager = cacheManager;
@@ -80,7 +85,9 @@ public class CachingFedoraUrlManager implements RepositoryUrlManager, Initializa
         if (cache == null) {
             cache = cacheManager.createCache(CACHE_ALIAS,
                     CacheConfigurationBuilder.newCacheConfigurationBuilder(AudioStreamId.class, URL.class,
-                            ResourcePoolsBuilder.heap(10).build()));
+                            ResourcePoolsBuilder.heap(1000).offheap(32, MemoryUnit.MB))
+                            .withExpiry(Expirations.timeToLiveExpiration(
+                                    Duration.of(configuration.getCacheTimeToLiveExpiration(), TimeUnit.SECONDS))).build());
         }
     }
 
